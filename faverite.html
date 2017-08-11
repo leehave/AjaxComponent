@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Ajax点赞组件</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" href="css/layer.css">
+</head>
+
+<body>
+    <ul class="side-tool">
+        <li class="fov" data-collect="0" data-post-id="349995"></li>
+        <li class="support" data-support="0" data-post-id="349995">26</li>
+        <li class="share-wechat">
+            <a class="jiathis_button_weixin"></a>
+        </li>
+        <li class="share-weibo">
+            <a class="jiathis_button_tsina"></a>
+        </li>
+    </ul>
+</body>
+<script src="https://cdn.bootcss.com/jquery/2.0.0/jquery.js"></script>
+<script type="text/javascript" src="layer.js"></script>
+<script type="text/javascript">
+     /**
+         * 收藏
+         */
+        $('body').on('click', '.fov', function(event) {
+            event.preventDefault();
+            var self = this;
+            var is_fav = $(self).attr('data-collect') == 1 ? 0 : 1;
+            var data = {
+                post_id: $(self).attr('data-post-id'),
+                is_fav: is_fav
+            }
+            $.ajax({
+                url: 'url',
+                type: 'POST',
+                dataType: 'json',
+                data: data,
+                error: function(request) {
+                    layer.msg('收藏失败');
+                },
+                success: function(data) {
+                    if (data.code == 1) {
+                        jumpFrame('/login','800px','480px','login-class');
+                    } else if (data.code == 0){
+                        if (is_fav == 0) {
+                            $(self).removeClass('active');
+                            $(self).attr('data-collect', '0');
+                            layer.msg('取消收藏成功');
+                        } else {
+                            $(self).addClass('active');
+                            $(self).attr('data-collect', '1');
+                            layer.msg('收藏成功');
+                        }
+                    }
+                }
+            })
+        });
+        /**
+         * 点赞
+         */
+        $('body').on('click', '.support', function(event) {
+            event.preventDefault();
+            var self = this;
+            var data = {
+                post_id: $(self).attr('data-post-id'),
+                is_like: 1
+            }
+            $.ajax({
+                url: '',
+                type: 'POST',
+                dataType: 'json',
+                data: data,
+                error: function(request) {
+                    layer.msg('点赞失败');
+                },
+                success: function(data) {
+                    if (data.code == 0) {
+                        $(self).html($(self).html()-0+1);
+                        $(self).addClass('active');
+                        layer.msg('点赞成功');
+                    } else if (data.code == 10) {
+                        jumpFrame('/login','800px','480px','login-class');
+                    } else {
+                        layer.alert(data.message);
+                    }
+                }
+            })
+        });
+        /**
+         * 文章数
+         */
+        var postAuthor = '';
+        $.ajax({
+                url: '' + postAuthor,
+                type: 'GET',
+                dataType: 'json',
+                success: function(res) {
+                    if (res.code == 0 && res.data.count > 0) {
+                        var authorArticleItem = '';
+                        for (var i = 0; i < res.data.models.length; i++) {
+                            authorArticleItem += '<li class="author-article-item"><a class="title" href="/archives/'+ res.data.models[i].ID +'">'+ res.data.models[i].post_title +'</a><p class="time">'+ res.data.models[i].time_ago +'</p></li>'
+                        }
+                        var html = '<div class="module-box mb20"><div class="author-article-total text-center"><span>文章数'+ res.data.count +'</span></div><ul class="author-article-list">'+ authorArticleItem +'</ul></div>'
+                        $('#open_reporter_box').after(html);
+                    }
+                },
+                error: function(res) {
+                    console.log(res);
+                }
+            })
+        // jumpFrame函数封装
+        // layer 弹窗
+function jumpFrame(frameUrl,frameWidth,frameHeight,skin){
+    var index=layer.open({
+        type: 2,
+        shade: [0.8, '#fff'],
+        title: false,
+        skin: skin,
+        area: [frameWidth, frameHeight],
+        content: frameUrl //iframe的url
+    });
+    //关闭上一个frame
+    layer.close(index-1);
+}
+</script>
+</html>
